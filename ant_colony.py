@@ -4,18 +4,23 @@ from citiesReader import readCities
 
 alpha = 1
 beta = 5
-ant_number = 100
+ants_number = 100
 Q = 500
 K = 100
 
 cities = readCities()
-visited = []
+visited = {}
 pheromones = {}# (city_from, city_to) -> pheromones
 city_solve = next(
     filter(
         lambda city: city.cityname == 'A',
         cities),
     None)
+ants = []
+
+class Ant:
+    def __init__(self, random_city):
+        self.city = random_city
 
 def calculate_distance(city_from, city_to):
     x1 = city_from.x
@@ -29,10 +34,10 @@ def get_visibility(city_from, city_to):
     return 1 / calculate_distance(city_from, city_to)
 
 def is_visited(city):
-    return city in visited
+    return visited.get(city, False)
 
 def set_visited(city):
-    visited.append(city)
+    visited[city] = True
 
 def get_pheromone(city_from, city_to):
     pair = (city_from, city_to)
@@ -73,10 +78,31 @@ def get_unvisited_cities():
         if city not in visited:
             unvisited.append(city)
 
+def init_pheromones():
+    pheromones.clear()
+    N = len(cities)
+    for city_i in cities:
+        for city_j in cities:
+            if city_i != city_j:
+                pheromones[(city_i, city_j)] = 1 / N
+            else:
+                pheromones[(city_i, city_i)] = 0
+
+def init_ants():
+    ants.clear()
+    cities_view = cities[:]
+    for i in range(ants_number):
+        random_city = random.choice(cities_view)
+        cities_view.remove(random_city)
+        ants.append(Ant(random_city))
+
 def main():
+    init_pheromones()
+    init_ants()
+
     for k in K:
         for ant in ants:
-            current_city = ant.current_city
+            current_city = ant.city
             transition_probabilities = []
             for city_candidate in get_unvisited_cities():
                 p = get_movement_probability(current_city, city_candidate)
