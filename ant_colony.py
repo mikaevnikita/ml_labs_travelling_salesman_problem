@@ -5,7 +5,7 @@ from citiesReader import readCities
 alpha = 1
 beta = 5
 ants_number = 100
-Q = 500
+Q = 10
 K = 100
 
 cities = readCities()
@@ -106,6 +106,7 @@ def main():
             transition_probabilities = []
             for city_candidate in get_unvisited_cities():
                 p = get_movement_probability(current_city, city_candidate)
-                transition_probabilities.append(p)
-
+                transition_probabilities.append((city_candidate, p))
+            best_candidate_pair = max(transition_probabilities, lambda pair : pair[1])
+            best_candidate = best_candidate_pair[0]
 main()
