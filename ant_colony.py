@@ -3,10 +3,10 @@ import math
 from citiesReader import readCities
 
 alpha = 1
-beta = 5
-ants_number = 100
+beta = 1
+ants_number = 10
 Q = 10
-K = 100
+K = 10
 
 cities = readCities()
 visited = {}
@@ -45,9 +45,16 @@ def get_pheromone(city_from, city_to):
         return pheromones[pair]
     return 0
 
-def update_pheromone(city_from, city_to):
-    new_pheromone = (1 - random.random()) * get_pheromone(city_from, city_to) + delta
+def update_pheromone(city_from, city_to, trail_length):
+    new_pheromone = (1 - random.random()) * get_pheromone(city_from, city_to) + (Q/trail_length)
     pheromones[(city_from, city_to)] = new_pheromone
+
+def update_pheromones(trail):
+    trail_length = get_length_of_trail(trail)
+    for i in range(len(trail) - 1):
+        city_from = trail[i]
+        city_to = trail[i+1]
+        update_pheromone(city_from, city_to, trail_length)
 
 def get_movement_probability(city_from, city_to, candidates_cities):
     def calc_main_part(city_from, city_to):
@@ -75,30 +82,28 @@ def print_trail(trail):
 def get_unvisited_cities():
     unvisited = []
     for city in cities:
-        if city not in visited:
+        if not is_visited(city):
             unvisited.append(city)
 
 def init_pheromones():
     pheromones.clear()
-    N = len(cities)
     for city_i in cities:
         for city_j in cities:
             if city_i != city_j:
-                pheromones[(city_i, city_j)] = 1 / N
+                pheromones[(city_i, city_j)] = 1
             else:
                 pheromones[(city_i, city_i)] = 0
 
 def init_ants():
     ants.clear()
-    cities_view = cities[:]
     for i in range(ants_number):
-        random_city = random.choice(cities_view)
-        cities_view.remove(random_city)
-        ants.append(Ant(random_city))
+        ants.append(Ant(city_solve))
 
 def main():
     init_pheromones()
     init_ants()
+
+    minimal_trail_length = float('inf')
 
     for k in K:
         for ant in ants:
@@ -109,4 +114,6 @@ def main():
                 transition_probabilities.append((city_candidate, p))
             best_candidate_pair = max(transition_probabilities, lambda pair : pair[1])
             best_candidate = best_candidate_pair[0]
+            ant.city = best_candidate
+            set_visited(current_city)
 main()
