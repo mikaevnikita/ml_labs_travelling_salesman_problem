@@ -119,6 +119,7 @@ def main():
             while True:
                 unvisited_cities = get_unvisited_cities()
                 if len(unvisited_cities) == 0:
+                    current_trail.append(city_solve)
                     break
                 current_city = ant.city
                 current_trail.append(current_city)
@@ -128,6 +129,7 @@ def main():
                     transition_probabilities.append((city_candidate, p))
                 best_candidate_pair = max(transition_probabilities, key=lambda pair : pair[1])
                 best_candidate = best_candidate_pair[0]
+
                 ant.city = best_candidate
                 set_visited(current_city)
             current_trail_length = get_length_of_trail(current_trail)
@@ -136,6 +138,7 @@ def main():
                 minimal_trail = current_trail
             visited.clear()
             update_pheromones(current_trail)
+        init_ants()
     print_trail(minimal_trail)
     print("Length: " + str(minimal_trail_length))
 main()
